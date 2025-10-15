@@ -1,0 +1,6 @@
+crawl4ai
+ipykernel
+cssselect
+langchain-community
+langchain-qdrant
+mistralai
