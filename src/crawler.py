@@ -67,7 +67,7 @@ class BaseCrawler:
 
         return decorator
 
-    @retry_async(retries=2, delay=1.5)
+    @retry_async(retries=1, delay=1.5)
     async def _fetch_page_data(self, crawler, url: str, semaphore: asyncio.Semaphore):
         """Асинхронное извлечение ссылок и содержимого с повторной попыткой и ограничением параллелизма"""
         run_config1 = self._build_run_config()
@@ -124,7 +124,7 @@ class BaseCrawler:
                 results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 for (url, depth), res in zip(current_batch, results):
-                    if isinstance(res, Exception):
+                    if isinstance(res, Exception) or res is None:
                         print(f"Error fetching {url}: {res}")
                         continue
 
