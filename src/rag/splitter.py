@@ -1,7 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-from utils import hash_content
+from src.utils import hash_content
 
 
 class DocumentSplitter:

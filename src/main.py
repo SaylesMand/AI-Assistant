@@ -10,24 +10,15 @@
 # end = time()
 # print(f"\nПрошло {end - start:.2f} секунд\n")
 
+from fastapi import FastAPI
+from src.api.routers import router
 
-from rag.loader import DocumentLoader
-from rag.splitter import DocumentSplitter
-from rag.indexing import Index
-from rag.pipeline import RAGPipeline
 
-from config import settings
+app = FastAPI()
+app.include_router(router)
+
+# question = "Из чего состоит архитектура MaxPatrol 10?"
 
 if __name__ == "__main__":
-    api_key = settings.MISTRAL_API_KEY
-    loader = DocumentLoader("data/data_copy2.json")
-    splitter = DocumentSplitter(chunk_size=settings.CHUNK_SIZE)
-    docs = splitter.split_docs(loader.load())
-
-    index = Index(api_key=api_key, path=settings.QDRANT_PATH, collection_name=settings.QDRANT_COLLECTION)
-    vector_store = index.add_documents(docs)
-
-    rag = RAGPipeline(vector_store, api_key=api_key, top_k=settings.TOP_K)
-
-    question = "Из чего состоит архитектура MaxPatrol 10?"
-    print(rag.ask(question))
+    import uvicorn
+    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -5,3 +5,5 @@ langchain-community
 langchain-qdrant
 langchain-mistralai
 mistralai
+fastapi
+uvicorn
