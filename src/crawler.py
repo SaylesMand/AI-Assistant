@@ -7,9 +7,11 @@ from functools import wraps
 import asyncio
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
+from src.config import settings
+
 
 class BaseCrawler:
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
         parsed_url = urlparse(url)
         self.base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
@@ -66,16 +68,14 @@ class BaseCrawler:
         return decorator
 
     @retry_async(retries=2, delay=1.5)
-    async def _fetch_page_data(
-        self, crawler, url: str, semaphore: asyncio.Semaphore, retries: int = 2
-    ):
+    async def _fetch_page_data(self, crawler, url: str, semaphore: asyncio.Semaphore):
         """Асинхронное извлечение ссылок и содержимого с повторной попыткой и ограничением параллелизма"""
         run_config1 = self._build_run_config()
         run_config2 = self._build_run_config(
             css_selector="content-container",
         )
 
-        async with semaphore:  # ограничение числа одновременных запросов            
+        async with semaphore:  # ограничение числа одновременных запросов
             result1, result2 = await asyncio.gather(
                 crawler.arun(url=url, config=run_config1),
                 crawler.arun(url=url, config=run_config2),
@@ -151,10 +151,20 @@ class BaseCrawler:
 
         return data
 
-    def run_crawler(self, start_url: str, max_depth: int = 2, max_concurrent: int = 5):
+    def run_crawler(self, output_path: str, max_depth: int = 2, max_concurrent: int = 5):
         """Синхронная обёртка над асинхронным BFS-обходом"""
-        data = asyncio.run(self._crawl_all_pages(start_url, max_depth, max_concurrent))
+        print("[INFO] Начало парсинга переданного ресурса")
+        data = asyncio.run(self._crawl_all_pages(self.url, max_depth, max_concurrent))
 
-        with open("data.json", "w", encoding="utf-8") as fp:
+        with open(output_path, "w", encoding="utf-8") as fp:
             json.dump(data, fp, ensure_ascii=False)
         print(f"{len(data)} страниц сохранено в data.json")
+
+
+if __name__ == "__main__":
+    crawler = BaseCrawler(url=settings.DOCS_URL)
+    crawler.run_crawler(
+        output_path=settings.DATA_PATH,
+        max_depth=settings.MAX_DEPTH,
+        max_concurrent=settings.MAX_CONCURRENT,
+    )

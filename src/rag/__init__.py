@@ -7,7 +7,7 @@ from src.config import settings
 
 def build_rag_pipeline() -> RAGPipeline:
     api_key = settings.MISTRAL_API_KEY
-    loader = DocumentLoader("data/data_copy2.json")
+    loader = DocumentLoader(settings.DATA_PATH)
     splitter = DocumentSplitter(chunk_size=settings.CHUNK_SIZE)
     docs = splitter.split_docs(loader.load())
 

@@ -11,4 +11,9 @@ class Settings:
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
     TOP_K = int(os.getenv("TOP_K", "3"))
 
+    DATA_PATH = os.getenv("DATA_PATH")
+    DOCS_URL=os.getenv("DOCS_URL")
+    MAX_DEPTH=int(os.getenv("MAX_DEPTH"))
+    MAX_CONCURRENT=int(os.getenv("MAX_CONCURRENT"))
+
 settings = Settings()
