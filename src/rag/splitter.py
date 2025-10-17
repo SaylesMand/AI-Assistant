@@ -1,7 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-import hashlib
+from utils import hash_content
 
 
 class DocumentSplitter:
@@ -17,15 +17,12 @@ class DocumentSplitter:
             strip_whitespace=True,
         )
 
-    def _hash_content(self, text: str) -> str:
-        return hashlib.md5(text.encode("utf-8")).hexdigest()
-
     def split_docs(self, docs: list[Document]) -> list[Document]:
         """Разделить список LangChain Document на небольшие чанки и проверить на дубликаты"""
         processed_docs = []
         for doc in docs:
             chunks = self.text_splitter.split_text(doc.page_content)
-            content_hash = self._hash_content(doc.page_content)
+            content_hash = hash_content(doc.page_content)
 
             for i, chunk_text in enumerate(chunks):
                 metadata = {**doc.metadata}
