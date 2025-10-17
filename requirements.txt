@@ -3,4 +3,5 @@ ipykernel
 cssselect
 langchain-community
 langchain-qdrant
+langchain-mistralai
 mistralai
