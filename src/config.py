@@ -16,4 +16,6 @@ class Settings:
     MAX_DEPTH=int(os.getenv("MAX_DEPTH"))
     MAX_CONCURRENT=int(os.getenv("MAX_CONCURRENT"))
 
+    DB_PATH = os.getenv("DB_PATH")
+
 settings = Settings()
