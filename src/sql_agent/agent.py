@@ -7,8 +7,6 @@ from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 
-from src.config import settings
-
 
 class SQLAgent:
     def __init__(self, db_path: str, llm: ChatMistralAI):
@@ -41,17 +39,10 @@ class SQLAgent:
 
         # Создаем агента с поддержкой инструментов
         agent = create_openai_tools_agent(self.llm, tools, prompt)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False, handle_parsing_errors=True)
         return agent_executor
 
-    def get_response(self, query: str) -> dict[str, Any]:
+    def ask(self, query: str) -> dict[str, Any]:
         """Выдает ответ на запрос пользователя, используя AgentExecutor"""
         response = self._agent_executor.invoke({"input": query})
         return response.get("output", "Не удалось получить ответ.")
-    
-if __name__ == "__main__":    
-    llm = ChatMistralAI(model_name="mistral-small-latest", api_key=settings.MISTRAL_API_KEY)
-    agent = SQLAgent(db_path=settings.DB_PATH, llm=llm)
-
-    query = "What is the role of Jane Doe's employee?"
-    print(agent.get_response(query=query))
