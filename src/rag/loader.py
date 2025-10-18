@@ -11,7 +11,7 @@ class DocumentLoader:
         self.path = path
 
     def _ensure_data_exists(self):
-        data_path = Path(settings.DATA_PATH)
+        data_path = Path(settings.DATA_PATH).resolve()
         if not data_path.exists():
             raise FileNotFoundError(
                 f"Файл {data_path} не найден."
