@@ -12,12 +12,12 @@ async def lifespan(app: APIRouter):
     # RAG
     print("[INFO] Инициализация RAG...")
     app.state.rag = build_rag_pipeline()
-    print("[INFO] RAG успешно загружен")
+    print("[INFO] RAG успешно запущен")
 
     # SQL Agent
     print("[INFO] Инициализация SQL Agent...")
     app.state.sql_agent = load_sql_agent()
-    print("[INFO] SQL Agent успешно загружен")
+    print("[INFO] SQL Agent успешно запущен")
 
     yield
 

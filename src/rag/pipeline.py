@@ -1,16 +1,17 @@
 from langchain_core.prompts import PromptTemplate
-from langchain_mistralai import ChatMistralAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+
+from langchain_core.language_models.chat_models import BaseChatModel
 
 
 class RAGPipeline:
     """Объединяет retrieval + генерацию ответа."""
 
-    def __init__(self, vector_store, api_key: str, top_k: int = 3):
+    def __init__(self, vector_store, llm: BaseChatModel, top_k: int = 3):
         self.vector_store = vector_store
         self.retriever = vector_store.as_retriever(search_kwargs={"k": top_k})
-        self.llm = ChatMistralAI(model="mistral-small-latest", api_key=api_key)
+        self.llm = llm 
         self.prompt = PromptTemplate.from_template(
             """
             Ты — технический ассистент компании Positive Technologies.

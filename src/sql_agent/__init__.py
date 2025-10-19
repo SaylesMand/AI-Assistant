@@ -1,11 +1,10 @@
-from langchain_mistralai import ChatMistralAI
-
 from src.config import settings
+from src.utils.models.llm_factory import create_chat_model
 from .agent import SQLAgent
 
 
 def load_sql_agent():
-    llm = ChatMistralAI(model_name="mistral-small-latest", api_key=settings.MISTRAL_API_KEY)
+    llm = create_chat_model()
     agent = SQLAgent(db_path=settings.DB_PATH, llm=llm)
     return agent
 

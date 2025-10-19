@@ -1,15 +1,16 @@
 from typing import Any
 from pathlib import Path
 
-from langchain_mistralai import ChatMistralAI
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 
+from langchain_core.language_models.chat_models import BaseChatModel
+
 
 class SQLAgent:
-    def __init__(self, db_path: str, llm: ChatMistralAI):
+    def __init__(self, db_path: str, llm: BaseChatModel):
         self.db_path = db_path
         self.llm = llm
         self._agent_executor = self._create_agent()

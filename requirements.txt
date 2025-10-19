@@ -4,6 +4,8 @@ cssselect
 langchain-community
 langchain-qdrant
 langchain-mistralai
+langchain_openai
+langchain_ollama
 mistralai
 fastapi
 uvicorn

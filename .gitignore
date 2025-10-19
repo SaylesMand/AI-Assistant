@@ -1,3 +1,4 @@
 .env
 .venv
 temp_files
+.vscode
