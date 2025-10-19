@@ -30,17 +30,28 @@ class SQLAgent:
         db = self._load_database()
         toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
         tools = toolkit.get_tools()
-            
+
         # Создаем промпт для инструментов
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are a helpful SQL expert. Use the tools to query the database."),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """Ты - технический ассистент, специализирующийся на работе с базами данных SQL.
+                    Анализируй вопрос пользователя, формируй корректные SQL-запросы и давай ответ только по базе данных.
+                    Используй предоставленные инструменты и главное, не выдумывай.
+                    Если ответа нет в базе данных, скажи "В предоставленной базе данных нет информации".
+                    """,
+                ),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
 
         # Создаем агента с поддержкой инструментов
         agent = create_openai_tools_agent(self.llm, tools, prompt)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False, handle_parsing_errors=True)
+        agent_executor = AgentExecutor(
+            agent=agent, tools=tools, verbose=False, handle_parsing_errors=True
+        )
         return agent_executor
 
     def ask(self, query: str) -> dict[str, Any]:
