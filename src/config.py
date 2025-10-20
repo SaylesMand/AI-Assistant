@@ -20,7 +20,7 @@ class Settings:
 
     # RAG config
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
-    TOP_K = int(os.getenv("TOP_K", "3"))
+    FETCH_K = int(os.getenv("FETCH_K", "3"))
 
     # Data / DB
     DATA_PATH = os.getenv("DATA_PATH")

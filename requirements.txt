@@ -9,3 +9,4 @@ langchain_ollama
 mistralai
 fastapi
 uvicorn
+ddgs

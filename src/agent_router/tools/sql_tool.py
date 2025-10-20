@@ -1,4 +1,4 @@
-from src.sql_agent import load_sql_agent
+from src.sql import load_sql_agent
 
 
 class SQLTool:

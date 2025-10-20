@@ -1,24 +1,15 @@
+import httpx
+
 from contextlib import asynccontextmanager
 from fastapi import APIRouter, HTTPException, Request
 
 from src.api.schemas import QueryRequest, QueryResponse
 from src.agent_router import load_router_agent
-# from src.rag import build_rag_pipeline
-# from src.sql_agent import load_sql_agent
 
 
 @asynccontextmanager
 async def lifespan(app: APIRouter):
     """Инициализирует Router Agent при запуске."""
-    # # RAG
-    # print("[INFO] Инициализация RAG...")
-    # app.state.rag = build_rag_pipeline()
-    # print("[INFO] RAG успешно запущен")
-
-    # # SQL Agent
-    # print("\n[INFO] Инициализация SQL Agent...")
-    # app.state.sql_agent = load_sql_agent()
-    # print("[INFO] SQL Agent успешно запущен")
 
     # Router Agent
     print("[INFO] Инициализация Router Agent...")
@@ -31,34 +22,6 @@ async def lifespan(app: APIRouter):
 router = APIRouter(prefix="/agent", lifespan=lifespan)
 
 
-# @router.post("/rag/ask", response_model=QueryResponse)
-# async def ask_rag(request: Request, query: QueryRequest):
-#     """Ответ от RAG-системы."""
-#     rag = getattr(request.app.state, "rag", None)
-#     if rag is None:
-#         raise HTTPException(status_code=500, detail="RAG не инициализирован")
-
-#     try:
-#         answer = rag.ask(query.question)
-#         return QueryResponse(answer=answer)
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-
-# @router.post("/sql_agent/ask", response_model=QueryResponse)
-# async def ask_sql_agent(request: Request, query: QueryRequest):
-#     """Ответ от SQL агента."""
-#     sql_agent = getattr(request.app.state, "sql_agent", None)
-#     if sql_agent is None:
-#         raise HTTPException(status_code=500, detail="SQL Agent не инициализирован")
-
-#     try:
-#         answer = sql_agent.ask(query.question)
-#         return QueryResponse(answer=str(answer))
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.post("/ask", response_model=QueryResponse)
 async def ask_agent(request: Request, query: QueryRequest):
     """Ответ от Агента-оркерстратора"""
@@ -68,5 +31,22 @@ async def ask_agent(request: Request, query: QueryRequest):
     try:
         answer = router_agent.ask(query.question)
         return QueryResponse(answer=answer)
+    except httpx.HTTPStatusError as e:
+        # Ловим ошибки, которые возвращает API Mistral / OpenAI
+        code = e.response.status_code
+        if code == 429:
+            detail = "Сервис перегружен (Mistral 429). Попробуйте позже."
+        elif code == 400:
+            detail = "Ошибка в запросе к модели (400). Проверьте формат запроса."
+        elif code >= 500:
+            detail = "Проблема на стороне модели (500). Попробуйте позже."
+        else:
+            detail = f"Ошибка при обращении к LLM: {e.response.text}"
+        raise HTTPException(status_code=code, detail=detail)
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Все остальные ошибки
+        raise HTTPException(
+            status_code=500,
+            detail=f"Неизвестная ошибка при работе с агентом: {str(e)}",
+        )

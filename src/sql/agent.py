@@ -1,18 +1,19 @@
 from typing import Any
 from pathlib import Path
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 
-from langchain_core.language_models.chat_models import BaseChatModel
 
 
 class SQLAgent:
     def __init__(self, db_path: str, llm: BaseChatModel):
         self.db_path = db_path
-        self.llm = llm
+        self.llm = llm        
+
         self._agent_executor = self._create_agent()
 
     def _load_database(self) -> SQLDatabase:
@@ -38,8 +39,11 @@ class SQLAgent:
                     "system",
                     """Ты - технический ассистент, специализирующийся на работе с базами данных SQL.
                     Анализируй вопрос пользователя, формируй корректные SQL-запросы и давай ответ только по базе данных.
-                    Используй предоставленные инструменты и главное, не выдумывай.
-                    Если ответа нет в базе данных, скажи "В предоставленной базе данных нет информации".
+                    Используй предоставленные инструменты.
+                    Если SQL-запрос выполнился успешно и данные получены, выведи их пользователю.
+                    Если база данных вернула пустой результат (нет строк), скажи "В предоставленной базе данных нет информации".
+                    Не придумывай информацию сам.
+
                     """,
                 ),
                 ("human", "{input}"),
@@ -48,13 +52,19 @@ class SQLAgent:
         )
 
         # Создаем агента с поддержкой инструментов
-        agent = create_openai_tools_agent(self.llm, tools, prompt)
+        agent = create_tool_calling_agent(self.llm, tools, prompt)
         agent_executor = AgentExecutor(
-            agent=agent, tools=tools, verbose=False, handle_parsing_errors=True
+            agent=agent,
+            tools=tools,
+            verbose=False,
+            handle_parsing_errors=True,
         )
         return agent_executor
 
     def ask(self, query: str) -> dict[str, Any]:
         """Выдает ответ на запрос пользователя, используя AgentExecutor"""
         response = self._agent_executor.invoke({"input": query})
-        return response.get("output", "Не удалось получить ответ.")
+        if isinstance(response, dict):
+            return response.get("output", "Не удалось получить ответ.")
+        return str(response)
+
