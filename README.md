@@ -77,10 +77,22 @@ cp .env.example .env
 и укажи свои значения:
 
 ```env
-MISTRAL_API_KEY=your_api_key_here
-QDRANT_PATH=data/qdrant
-QDRANT_COLLECTION=qdrant_rag
-DB_PATH=data/database.db
+# LLM CONFIGURATION
+API_KEY=YOUR_API_KEY
+# mistral | openai | ollama | vllm
+LLM_MODE=mistral
+LLM_MODEL=YOUR_LLM_MODEL
+EMBEDDING_MODEL=YOUR_EMBEDDING_MODEL
+
+# RAG Agent SETTINGS
+DATA_PATH=data/data.json
+
+# CRAWLER
+DOCS_URL=https://help.ptsecurity.com/ru-RU/projects/mp10/27.4/help/922069771
+```
+### 3. Спарси данные через crawl4ai
+```bash
+python -m src.crawler
 ```
 
 ### 4. Собери контейнеры
@@ -159,19 +171,6 @@ curl -X POST "http://localhost:8000/agent/ask" \
 
 ---
 
-## Переменные окружения
-
-| Переменная          | Описание                             | Пример                 |
-| ------------------- | ------------------------------------ | ---------------------- |
-| `MISTRAL_API_KEY`   | API ключ модели Mistral              | `your_mistral_api_key` |
-| `QDRANT_PATH`       | Путь к локальному Qdrant-хранилищу   | `data/qdrant`          |
-| `QDRANT_COLLECTION` | Имя коллекции                        | `qdrant_rag`           |
-| `DB_PATH`           | Путь к SQLite базе данных            | `data/employees.db`    |
-| `CHUNK_SIZE`        | Размер чанков при нарезке документов | `1000`                 |
-| `TOP_K`             | Количество возвращаемых документов   | `5`                    |
-
----
-
 ## Планы по развитию
 
 * [ ] Оценка качества
@@ -184,7 +183,7 @@ curl -X POST "http://localhost:8000/agent/ask" \
 
 **Daniil M.**
 ML Engineer
-📧 [[telegram](https://t.me/daniil_domino)]
+📧 [[Telegram](https://t.me/daniil_domino)]
 💼 [GitHub Profile](https://github.com/SaylesMand)
 
 ---
