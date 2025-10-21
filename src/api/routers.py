@@ -42,10 +42,12 @@ async def ask_agent(request: Request, query: QueryRequest):
             detail = "Проблема на стороне модели (500). Попробуйте позже."
         else:
             detail = f"Ошибка при обращении к LLM: {e.response.text}"
+        print(f"[ERROR] {str(e)}")
         raise HTTPException(status_code=code, detail=detail)
 
     except Exception as e:
         # Все остальные ошибки
+        print(f"[ERROR] {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Неизвестная ошибка при работе с агентом: {str(e)}",

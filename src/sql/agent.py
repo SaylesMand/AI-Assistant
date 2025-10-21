@@ -1,70 +1,48 @@
-from typing import Any
 from pathlib import Path
 
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain.agents import create_agent
 
 
 class SQLAgent:
+    """Агент, использующий SQL-запросы для ответов на вопросы по базе данных."""
+
     def __init__(self, db_path: str, llm: BaseChatModel):
         self.db_path = db_path
-        self.llm = llm        
+        self.llm = llm
+        self.db = self._load_database()
 
-        self._agent_executor = self._create_agent()
+        # Создаём toolkit и инструменты
+        toolkit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
+        self.tools = toolkit.get_tools()
+
+        self.prompt = """Ты - технический ассистент, специализирующийся на SQL.
+                    Твоя задача - анализировать вопрос пользователя и формировать корректные SQL-запросы.
+                    Используй только предоставленные инструменты и данные из базы.
+
+                    Правила:
+                    - Если SQL-запрос успешно выполнился и вернул данные, покажи их пользователю.
+                    - Если запрос вернул пустой результат, ответь: "В предоставленной базе данных нет информации."
+                    - Не выдумывай ответов. Не добавляй посторонние комментарии.
+                    - Если результат неоднозначен, уточни у пользователя.
+                    """
+
+        self.agent = create_agent(self.llm, self.tools, system_prompt=self.prompt)
 
     def _load_database(self) -> SQLDatabase:
-        """Инициализирует LangChain SQLDatabase, используя локальную БД"""
+        """Инициализирует LangChain SQLDatabase, используя локальную SQLite БД."""
         db_file = Path(self.db_path).resolve()
         if not db_file.exists():
             raise FileNotFoundError(
-                f"SQL database {db_file} не найден."
-                "Пожалуйста, загрузите .db файл в начале."
+                f"SQL база данных {db_file} не найдена. "
+                "Проверь путь или загрузите .db файл."
             )
         return SQLDatabase.from_uri(f"sqlite:///{db_file}")
 
-    def _create_agent(self) -> AgentExecutor:
-        """Загружает SQL toolkit, определяет промпт и создает агента"""
-        db = self._load_database()
-        toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
-        tools = toolkit.get_tools()
+    def ask(self, query: str) -> str:
+        """Обрабатывает запрос пользователя и возвращает ответ от SQL агента."""
+        response = self.agent.invoke({"messages": [{"role": "user", "content": query}]})
 
-        # Создаем промпт для инструментов
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """Ты - технический ассистент, специализирующийся на работе с базами данных SQL.
-                    Анализируй вопрос пользователя, формируй корректные SQL-запросы и давай ответ только по базе данных.
-                    Используй предоставленные инструменты.
-                    Если SQL-запрос выполнился успешно и данные получены, выведи их пользователю.
-                    Если база данных вернула пустой результат (нет строк), скажи "В предоставленной базе данных нет информации".
-                    Не придумывай информацию сам.
-
-                    """,
-                ),
-                ("human", "{input}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
-            ]
-        )
-
-        # Создаем агента с поддержкой инструментов
-        agent = create_tool_calling_agent(self.llm, tools, prompt)
-        agent_executor = AgentExecutor(
-            agent=agent,
-            tools=tools,
-            verbose=False,
-            handle_parsing_errors=True,
-        )
-        return agent_executor
-
-    def ask(self, query: str) -> dict[str, Any]:
-        """Выдает ответ на запрос пользователя, используя AgentExecutor"""
-        response = self._agent_executor.invoke({"input": query})
-        if isinstance(response, dict):
-            return response.get("output", "Не удалось получить ответ.")
-        return str(response)
-
+        return response["messages"][-1].content

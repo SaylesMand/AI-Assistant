@@ -11,12 +11,12 @@ class Settings:
     # Qdrant
     QDRANT_PATH = os.getenv("QDRANT_PATH", "data/qdrant")
     QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "qdrant_rag")
+    QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
 
     # LLM config
     LLM_MODE = os.getenv("LLM_MODE", "mistral")  # ["mistral", "openai", "ollama", "vllm"]
     LLM_MODEL = os.getenv("LLM_MODEL", "mistral-small-latest")
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "mistral-embed")
-    BASE_URL = os.getenv("BASE_URL", "http://localhost:11434") # for Ollama: http://localhost:11434 or vLLM: http://localhost:8000/v1
 
     # RAG config
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))

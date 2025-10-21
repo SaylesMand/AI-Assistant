@@ -1,9 +1,6 @@
-from typing import Any
-
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import create_agent
 from langchain_core.tools import create_retriever_tool
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_core.language_models.chat_models import BaseChatModel
 
 
 class RAGAgent:
@@ -22,45 +19,22 @@ class RAGAgent:
         )
         self.llm = llm
 
-        self._agent_executor = self._create_agent()
-
-    def _create_agent(self) -> AgentExecutor:
-        """Определяет промпт, загружает инструмент и создает агента"""
-
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """Ты - технический ассистент компании Positive Technologies.
+        self.prompt = """Ты - технический ассистент компании Positive Technologies.
                     Отвечай только на основе предоставленного контекста.
-                    Если ответа нет в контексте, скажи: "В предоставленной документации нет информации"."""
-                ),
-                ("human", "{input}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
-            ]
-        )
-
-        tools = [
+                    Если ответа нет в контексте, скажи: "В предоставленной документации нет информации".
+                    """
+        self.tools = [
             create_retriever_tool(
                 retriever=self.retriever,
                 name="RAG",
                 description="Для поиска информации во внутренней документации",
             ),
         ]
+        self.agent = create_agent(self.llm, self.tools, system_prompt=self.prompt)
 
-        agent = create_tool_calling_agent(self.llm, tools, prompt)
-        agent_executor = AgentExecutor(
-            agent=agent,
-            tools=tools,
-            verbose=False,
-            handle_parsing_errors=True,
-        )
-        return agent_executor
-
-    def ask(self, query: str) -> dict[str, Any]:
-        """Выдает ответ на запрос пользователя, используя AgentExecutor"""
-        response = self._agent_executor.invoke({"input": query})
-        print(f"\n\nresponse:{response}\n\n")
-        if isinstance(response, dict):
-            return response.get("output", "Не удалось получить ответ.")
-        return str(response)
+    def ask(self, query: str) -> str:
+        """Обрабатывает запрос пользователя и возвращает ответ от RAG агента."""
+        response = self.agent.invoke({"messages": [{"role": "user", "content": query}]})
+        # print(f"\n\nreponse:\n{response}\n")
+        # response["messages"][-1].pretty_print()
+        return response["messages"][-1].content

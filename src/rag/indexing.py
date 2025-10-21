@@ -12,7 +12,8 @@ class Index:
     def __init__(self, path: str, collection_name: str, embeddings: Embeddings):
         self.path = path
         self.collection_name = collection_name
-        self.client = QdrantClient(path=self.path)
+        self.client = QdrantClient(url=settings.QDRANT_URL)
+        # self.client = QdrantClient(path=settings.QDRANT_PATH)
         self.embeddings = embeddings
 
     def initialize(self):

@@ -1,0 +1,28 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: always
+    ports:
+      - "6333:6333"   # API порт
+      - "6334:6334"   # gRPC порт
+    volumes:
+      - ./data/qdrant:/qdrant/storage  # локальное хранилище
+    environment:
+      QDRANT__STORAGE__STORAGE_PATH: "/qdrant/storage"
+      QDRANT__SERVICE__GRPC_PORT: 6334
+
+  ai-assistant:
+    build: .
+    container_name: ai-assistant
+    restart: always
+    depends_on:
+      - qdrant
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    environment:
+      QDRANT_URL: "http://qdrant:6333"
