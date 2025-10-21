@@ -32,7 +32,7 @@ async def ask_agent(request: Request, query: QueryRequest):
         answer = router_agent.ask(query.question)
         return QueryResponse(answer=answer)
     except httpx.HTTPStatusError as e:
-        # Ловим ошибки, которые возвращает API Mistral / OpenAI
+        # Ловим ошибки, которые возвращает API Mistral
         code = e.response.status_code
         if code == 429:
             detail = "Сервис перегружен (Mistral 429). Попробуйте позже."

@@ -166,8 +166,9 @@ curl -X POST "http://localhost:8000/agent/ask" \
   "answer": "MaxPatrol 10 построена на модульной архитектуре с центральным компонентом MP 10 Core..."
 }
 ```
-
+Ревью LLM-ассистента приведено в [review.md](review.md)
 ---
+
 
 ## Технологии
 
