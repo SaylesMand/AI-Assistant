@@ -22,7 +22,7 @@ class Settings:
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
     FETCH_K = int(os.getenv("FETCH_K", "3"))
 
-    # Data / DB
+    # Crawler / DB
     DATA_PATH = os.getenv("DATA_PATH")
     DOCS_URL = os.getenv("DOCS_URL")
     MAX_DEPTH = int(os.getenv("MAX_DEPTH", "1"))

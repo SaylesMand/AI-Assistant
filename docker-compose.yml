@@ -1,4 +1,15 @@
 services:
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile.crawler
+    command: ["python", "-m", "src.crawler"]
+    restart: "no"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
@@ -13,7 +24,9 @@ services:
       QDRANT__SERVICE__GRPC_PORT: 6334
 
   ai-assistant:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ai-assistant
     restart: always
     depends_on:

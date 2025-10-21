@@ -1,3 +1,4 @@
+import os
 import re
 import json
 from typing import Optional
@@ -151,14 +152,23 @@ class BaseCrawler:
 
         return data
 
-    def run_crawler(self, output_path: str, max_depth: int = 2, max_concurrent: int = 5):
+    def run_crawler(self, output_path: str, max_depth: int = 1, max_concurrent: int = 5):
         """Синхронная обёртка над асинхронным BFS-обходом"""
         print("[INFO] Начало парсинга переданного ресурса")
-        data = asyncio.run(self._crawl_all_pages(self.url, max_depth, max_concurrent))
+        new_data = asyncio.run(self._crawl_all_pages(self.url, max_depth, max_concurrent))        
+
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            with open(output_path, "r", encoding="utf-8") as fp:
+                old_data = json.load(fp)
+        else:
+            old_data = {}
+
+        old_data.update(new_data)
 
         with open(output_path, "w", encoding="utf-8") as fp:
-            json.dump(data, fp, ensure_ascii=False)
-        print(f"{len(data)} страниц сохранено в data.json")
+            json.dump(old_data, fp, ensure_ascii=False, indent=2)
+
+        print(f"{len(new_data)} страниц добавлено/обновлено в {output_path}")
 
 
 if __name__ == "__main__":

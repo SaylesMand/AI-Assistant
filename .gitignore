@@ -136,3 +136,4 @@ dmypy.json
 # other
 temp_files
 storage.sqlite
+data/qdrant/
