@@ -91,6 +91,7 @@ DATA_PATH=data/data.json
 DOCS_URL=https://help.ptsecurity.com/ru-RU/projects/mp10/27.4/help/922069771
 ```
 ### 3. Спарси данные через crawl4ai
+В случае если data/data.json отсутствует или неполный:
 ```bash
 python -m src.crawler
 ```
