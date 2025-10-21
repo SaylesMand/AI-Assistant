@@ -13,7 +13,7 @@
 ## Архитектура проекта
 
 ```
-ai-assistant/
+AI-Assistant/
 ├─ src/
 │  ├─ main.py                # Точка входа FastAPI
 │  ├─ config.py              # Конфигурация и загрузка переменных окружения
@@ -64,7 +64,7 @@ ai-assistant/
 ### 1. Клонируй репозиторий
 
 ```bash
-git clone https://github.com/SaylesMand/ai-assistant.git
+git clone https://github.com/SaylesMand/AI-Assistant.git
 cd ai-assistant
 ```
 
