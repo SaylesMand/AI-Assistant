@@ -98,7 +98,7 @@ DOCS_URL=https://help.ptsecurity.com/ru-RU/projects/mp10/27.4/help/922069771
 ### 3. Сборка контейнеров
 
 ```bash
-docker-compose --build -d
+docker-compose build
 ```
 
 ### 4. Парсинг документации через crawler
